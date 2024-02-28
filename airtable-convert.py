@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
 """
-# TODO:
-- en absence d'option, listing json des colonnes présentes avec leur caractéristiques
-- option de choix du format de sortie, json par défaut (json, csv)
-- option dechoix des colonnes prises en charge, toutes par défaut
-EXAMPLE:
-convert-airtable                 : liste en json la description des colonnes présentes dans la table
-convert-airtable -fmt csv        : converti la table au format csv en gardant toutes les colonnes présentes
-convert-airtable -c titre -c age : converti la table au format json en ne gardant que les valeurs des colonnes titre et age
+# TODO
+- default behaviour is to display existing airtable column descriptions i.e. column name and column characteristic
+- offer option to choose output format, json is the default format (json, csv)
+- offer option to chosse which columns are converted, all by default
+# EXAMPLE
+airtable-convert                 < airtable.json : list in json format all column descriptions airtable file
+airtable-convert -fmt csv        < airtable.json : convert all existing colomns from airtable file in csv format 
+airtable-convert -c title -c age < airtable.json : convert *title* and *age* columns from airtable file in flat json format
 """
 
 import sys
@@ -80,7 +80,7 @@ def main():
 #            print(line)
 
     else :
-        print("usage", sys.argv[0], "<lunii airtable json finename>")
+        print("usage", sys.argv[0], "<airtable json finename>")
 
 # Python boilerplate.
 if __name__ == '__main__':
