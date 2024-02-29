@@ -8,7 +8,7 @@ Converting airtable into simple format like json or cvs
 
 ---
 
-I once needed to scrap the content of an airtable see: [airtable.com](https://www.airtable.com).
+I once needed to scrap the content of an airtable (see: [airtable.com](https://www.airtable.com)).
 Traditional scraping tool were unable to:
 
 - extract the full content of a large table having more rows than what can is displayed on a web page.
@@ -29,15 +29,15 @@ Getting straight organized data (tabular or dictionary) requires to navigate bot
 
 ---
 
-airtable.convert.py [-h] [-c] [ [C ... ] [-j] ]  
-
-**positional arguments:**
- C           column names to be converted (default is all columns if no name is given)
-
-**options:**
- -h, --help      show this help message and exit
- -c, --columns   describe all airtable columns 
- -j, --json      convert airtable to cvs format (default is csv) 
+> airtable.convert.py [-h] [-c] [ [C ... ] [-j] ]  
+>
+> **positional arguments:**
+> C           column names to be converted (default is all columns if no name is given)
+>
+> **options:**
+> -h, --help      show this help message and exit
+> -c, --columns   describe all airtable columns
+> -j, --json      convert airtable to cvs format (default is csv)
 
 ## Credits
 
