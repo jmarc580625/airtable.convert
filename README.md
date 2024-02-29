@@ -39,6 +39,7 @@ options:
 -h, --help      show this help message and exit
 -c, --columns   describe all airtable columns
 -j, --json      convert airtable to cvs format (default is csv)
+```
 
 ## Credits
 
