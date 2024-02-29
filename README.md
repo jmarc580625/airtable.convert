@@ -25,20 +25,21 @@ Airtable content is not organized as straightforward as it is rendered on the we
 To cope with many table design and application use cases, it is structured with two main parts, a dictionary and a table content.
 Getting straight organized data (tabular or dictionary) requires to navigate both.
 
-## Command usage
+## Command syntax
 
 ---
 
 ```text
-airtable.convert.py [-h] [-c] [ [C ... ] [-j] ]  
+airtable.convert.py [-h] [-d [-j] ] [ [C ... ] [-j] ]  
 
 positional arguments:
-C           column names to be converted (default is all columns if no name is given)
+C ...           list of blank separated name of columns to be extracted (all columns if no name is given)
+                names containing spaces must be surounded by quotes
 
 options:
 -h, --help      show this help message and exit
--c, --columns   describe all airtable columns
--j, --json      convert airtable to cvs format (default is csv)
+-d, --dict      display summary of airtable dictionary i.e columns names and characteristics
+-j, --json      uses json output syntax (default is tabular)
 ```
 
 ## Credits
