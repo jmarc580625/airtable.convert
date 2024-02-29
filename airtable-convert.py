@@ -9,12 +9,15 @@
 airtable-convert                 < airtable.json : list in json format all column descriptions airtable file
 airtable-convert -fmt csv        < airtable.json : convert all existing colomns from airtable file in csv format 
 airtable-convert -c title -c age < airtable.json : convert *title* and *age* columns from airtable file in flat json format
+# CREDIT
+from an original idea described in https://medium.com/@sivcan/scraping-data-from-airtable-69007294ff26
 """
 
 import sys
 import json
 import copy
 import csv
+import argparse
 
 identifiers = {
     'Titre': 'titre',                       # multilineText
@@ -37,8 +40,7 @@ def get_data(row, columns):
     acc = {}
     for column in columns:
         if column['name'] in identifiers.keys():
-#           id=identifiers[column['name']]
-            id = column['name']#.encode('ascii', 'ignore')
+            id = column['name']
             if row['cellValuesByColumnId'].get(column['id']):
                 val = row['cellValuesByColumnId'][column['id']]
                 if column['type'] == 'select':
@@ -65,7 +67,16 @@ def flatData(data):
     return [[*names]] + [ [*map(line.get,names)] for line in lines ]
 
 def main():
-    args = sys.argv[1:]
+    parser = argparse.ArgumentParser(
+                    description='convert airtable content',
+                    epilog='Text at the bottom of help')
+    parser.add_argument('columns', metavar='C', nargs='*', help='columns to convert')
+    parser.add_argument('-f', '--format', default='json', help='define output format, default is json')
+
+    args=parser.parse_args()
+    print(args) 
+   # args = sys.argv[1:]
+
     if len(args) == 1 :
         jsonfile=args[0]
         print("opening", jsonfile, file=sys.stderr)
