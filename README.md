@@ -29,15 +29,16 @@ Getting straight organized data (tabular or dictionary) requires to navigate bot
 
 ---
 
-> airtable.convert.py [-h] [-c] [ [C ... ] [-j] ]  
->
-> **positional arguments:**
-> C           column names to be converted (default is all columns if no name is given)
->
-> **options:**
-> -h, --help      show this help message and exit
-> -c, --columns   describe all airtable columns
-> -j, --json      convert airtable to cvs format (default is csv)
+```text
+airtable.convert.py [-h] [-c] [ [C ... ] [-j] ]  
+
+**positional arguments:**
+C           column names to be converted (default is all columns if no name is given)
+
+**options:**
+-h, --help      show this help message and exit
+-c, --columns   describe all airtable columns
+-j, --json      convert airtable to cvs format (default is csv)
 
 ## Credits
 
