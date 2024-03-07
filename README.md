@@ -36,13 +36,13 @@ convert airtable content
 
 optional arguments:
   -h, --help            show this help message and exit
-  -f FILE, --file FILE  airtable file to be processed
+  -f FILE, --file FILE  airtable file to be processed (default: stdin)
   -x EXCLUDE [EXCLUDE ...], --exclude EXCLUDE [EXCLUDE ...]
-                        exclude column from extraction
+                        exclude column from convertion
   -i INCLUDE [INCLUDE ...], --include INCLUDE [INCLUDE ...]
-                        include column in extraction
+                        include column during convertion
   -r RENAME [RENAME ...], --rename RENAME [RENAME ...]
-                        rename column during extraction
+                        rename column during convertion
   -o {json,csv}, --outformat {json,csv}
                         define output format (default: csv)
 
