@@ -74,11 +74,11 @@ def main():
     
     parser = argparse.ArgumentParser(description='convert airtable content',
                                      epilog='any include, exclude or rename parameter which did not match an airtable dictionary entry is silently ignored')
-    parser.add_argument('-f', '--file', type=argparse.FileType(), help='airtable file to be processed')
+    parser.add_argument('-f', '--file', type=argparse.FileType(), help='airtable file to be processed (default: stdin)')
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-x', '--exclude', nargs='+', action='extend', help='exclude column from extraction')
-    group.add_argument('-i', '--include', nargs='+', action='extend', help='include column in extraction')
-    parser.add_argument('-r', '--rename', nargs='+', action=ParseRename, help='rename column during extraction')
+    group.add_argument('-x', '--exclude', nargs='+', action='extend', help='exclude column during convertion')
+    group.add_argument('-i', '--include', nargs='+', action='extend', help='include column during convertion')
+    parser.add_argument('-r', '--rename', nargs='+', action=ParseRename, help='rename column during convertion')
     parser.add_argument('-o', '--outformat', default='csv', choices=['json', 'csv'], help='define output format (default: csv)',)
     parser.add_argument('-v', '--verbose', default=0, action='count', help='define trace verbosity level',)
     
