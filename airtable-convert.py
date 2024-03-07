@@ -1,7 +1,7 @@
 
 """
-# TODO
-    trace might use loging interface instead of own simple 
+TODO:
+    -   TRACE & DEBUG should be based upon logging feature instead of my own (over)simplified functions below
 """
 
 import sys
@@ -12,19 +12,11 @@ import csv
 import argparse
 
 #-------------------------------------------------------------------------------
-def fatal(source, message):
-    error(source, message)
-    exit()
-
-def error(source, message):
-    if source: source+=" :"
-    print(source, message, file=sys.stderr)
-
 def trace(name, value):
-    return "{name}:{value}".format(name=name, value=value)
+    return f'{name}:{value}'
 
 def debug(message):
-    print("DEBUG", message, file=sys.stderr)
+    print('DEBUG', message, file=sys.stderr)
 
 #def debug(x): pass
 #-------------------------------------------------------------------------------
@@ -33,8 +25,8 @@ def get_dict(columns):
     dict = {} 
     for column in columns:
         col = {}
-        col.update({"description":column['description']})
-        col.update({"type":column['type']})
+        col.update({'description':column['description']})
+        col.update({'type':column['type']})
         dict.update({column['name']:col})
     return dict
 
@@ -58,10 +50,10 @@ def get_data(row, columns, dict):
                     acc[id] = val
     return acc
 
-def flatDict(D,p=""):
+def flatDict(D,p=''):
     if not isinstance(D,dict):
-        return {"":D}
-    return {p+k+s:v for k,d in D.items() for s,v in flatDict(d,".").items()}
+        return {'':D}
+    return {p+k+s:v for k,d in D.items() for s,v in flatDict(d,'.').items()}
 
 def flatData(data):
     lines = [*map(flatDict,data)]
@@ -75,7 +67,7 @@ class ParseRename(argparse.Action):
         for v in values:
             rename = v.split('=')
             if len(rename) != 2:
-                raise argparse.ArgumentError(self, "%s bad rename argument syntax, '=' missing" % v)
+                raise argparse.ArgumentError(self, f"bad rename argument syntax, '=' missing in '{v}'")
             getattr(namespace, self.dest).update({rename[0]:rename[1]})
 
 def main():
@@ -87,36 +79,33 @@ def main():
     group.add_argument('-x', '--exclude', nargs='+', action='extend', help='exclude column from extraction')
     group.add_argument('-i', '--include', nargs='+', action='extend', help='include column in extraction')
     parser.add_argument('-r', '--rename', nargs='+', action=ParseRename, help='rename column during extraction')
-    parser.add_argument('-o', '--outformat', default='csv', choices=["json", "csv"], help='define output format (default: csv)',)
-
-    debug("... parsing args")
+    parser.add_argument('-o', '--outformat', default='csv', choices=['json', 'csv'], help='define output format (default: csv)',)
+    parser.add_argument('-v', '--verbose', default=0, action='count', help='define trace verbosity level',)
+    
+    debug('... parsing args')
     args=parser.parse_args()
 
-    debug("... checking file")
+    debug('... checking file')
     if not args.file:
         if os.isatty(sys.stdin.fileno()):
-            fatal(os.path.basename(sys.argv[0]), "need a file to process")
+            parser.exit('need a file to process')
         else:
             args.file = sys.stdin
 
-    debug(trace("parser.prog", parser.prog))
-    debug(trace("outformat", args.outformat))
-    debug(trace("file", args.file))
-    debug(trace("include", args.include))
-    debug(trace("exclude", args.exclude))
-    debug(trace("rename", args.rename))
+    debug(args)
+    debug(trace("aaa", "bbb"))
 
-    debug("... loading")
+    debug('... loading')
     airtable = json.load(args.file)
-    columns = airtable["table"]["columns"]
-    rows = airtable["table"]["rows"]
+    columns = airtable['table']['columns']
+    rows = airtable['table']['rows']
 
-    debug("... extracting dict")
+    debug('... extracting dict')
     dict = get_dict(columns)
 
     if not args.include and not args.exclude and not args.rename: 
-        debug("... exporting dict")
-        if args.outformat == "csv":
+        debug('... exporting dict')
+        if args.outformat == 'csv':
             w = csv.DictWriter(sys.stdout, fieldnames='name description type'.split())
             for k,v in dict.items():
                 D = v.copy() # So dict is not modified.
@@ -126,10 +115,10 @@ def main():
             print(dict)
         exit()
 
-    [dict[name].update({"keep":True}) for name in args.include or [] if name in dict.keys()]
+    [dict[name].update({'keep':True}) for name in args.include or [] if name in dict.keys()]
 
     if args.exclude:
-        [dict[name].update({"keep":True}) for name in dict.keys() if name not in args.exclude] 
+        [dict[name].update({'keep':True}) for name in dict.keys() if name not in args.exclude] 
  
     for name in list(dict.keys()):
         if args.rename and name in args.rename.keys():
@@ -138,16 +127,16 @@ def main():
         elif not dict[name].get('keep'):
             del dict[name]
 
-    debug("... extracting data")
+    debug('... extracting data')
     data = [get_data(row, columns, dict) for row in rows]
 
-    if args.outformat == "csv":
-        debug("... writing csv output")
+    if args.outformat == 'csv':
+        debug('... writing csv output')
         writer = csv.writer(sys.stdout)
         for line in flatData(data):
             writer.writerow(line)
     else:
-        debug("... writing json output")
+        debug('... writing json output')
         print(data)
 
 # Python boilerplate.
