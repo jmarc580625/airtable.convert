@@ -30,21 +30,23 @@ Getting straight organized data (tabular or dictionary) requires to navigate bot
 ---
 
 ```text
-usage: airtable-convert.py [-h] [-f {json,csv}] [-i INPUT] [-d] [-x EXCLUDE | -c INCLUDE]
+usage: airtable-convert.py [-h] [-f FILE] [-x EXCLUDE [EXCLUDE ...] | -i INCLUDE [INCLUDE ...]] [-r RENAME [RENAME ...]] [-o {json,csv}]
 
 convert airtable content
 
 optional arguments:
   -h, --help            show this help message and exit
-  -f {json,csv}, --format {json,csv}
-                        define output format, default is csv
-  -i INPUT, --input INPUT
-                        input file definition
-  -d, --dict            extract dictionary
-  -x EXCLUDE, --exclude EXCLUDE
+  -f FILE, --file FILE  airtable file to be processed
+  -x EXCLUDE [EXCLUDE ...], --exclude EXCLUDE [EXCLUDE ...]
                         exclude column from extraction
-  -c INCLUDE, --include INCLUDE
-                        include column from extraction
+  -i INCLUDE [INCLUDE ...], --include INCLUDE [INCLUDE ...]
+                        include column in extraction
+  -r RENAME [RENAME ...], --rename RENAME [RENAME ...]
+                        rename column during extraction
+  -o {json,csv}, --outformat {json,csv}
+                        define output format (default: csv)
+
+any include, exclude or rename parameter which did not match an airtable dictionary entry is silently ignored
 ```
 
 ## Credits
