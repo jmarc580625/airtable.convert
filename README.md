@@ -30,17 +30,21 @@ Getting straight organized data (tabular or dictionary) requires to navigate bot
 ---
 
 ```text
-airtable.convert.py [-h] [-d [-j] ] [ [C ... ] [-j] ]  
+usage: airtable-convert.py [-h] [-f {json,csv}] [-i INPUT] [-d] [-x EXCLUDE | -c INCLUDE]
 
-positional arguments:
-C ...           list of blank separated names of columns to be extracted
-                all columns are extracted if no name is given
-                names containing spaces must be surounded by quotes
+convert airtable content
 
-options:
--h, --help      show this help message and exit
--d, --dict      display a summary of airtable dictionary i.e columns names and characteristics
--j, --json      uses json output syntax (default is tabular)
+optional arguments:
+  -h, --help            show this help message and exit
+  -f {json,csv}, --format {json,csv}
+                        define output format, default is csv
+  -i INPUT, --input INPUT
+                        input file definition
+  -d, --dict            extract dictionary
+  -x EXCLUDE, --exclude EXCLUDE
+                        exclude column from extraction
+  -c INCLUDE, --include INCLUDE
+                        include column from extraction
 ```
 
 ## Credits

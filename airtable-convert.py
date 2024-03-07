@@ -1,46 +1,48 @@
-#!/usr/bin/env python3
 
 """
 # TODO
-- default behaviour is to display existing airtable column descriptions i.e. column name and column characteristic
-- offer option to choose output format, json is the default format (json, csv)
-- offer option to chosse which columns are converted, all by default
-# EXAMPLE
-airtable-convert                 < airtable.json : list in json format all column descriptions airtable file
-airtable-convert -fmt csv        < airtable.json : convert all existing colomns from airtable file in csv format 
-airtable-convert -c title -c age < airtable.json : convert *title* and *age* columns from airtable file in flat json format
-# CREDIT
-from an original idea described in https://medium.com/@sivcan/scraping-data-from-airtable-69007294ff26
+    trace might use loging interface instead of own simple 
 """
 
 import sys
+import os
 import json
 import copy
 import csv
 import argparse
 
-identifiers = {
-    'Titre': 'titre',                       # multilineText
-    'Description': 'description',           # multilineText
-    'Catégorie': 'categorie',               # multiSelect
-    'Âge': 'age',                           # select
-    'Langue': 'langue',                     # select
-    'Producteur': 'producteur',             # multiSelect
-    'Narrateur': 'narrateur',               # text
-    'Créateur du pack': 'createur',         # multiSelect
-    'Mots-clés': 'mots cles',               # multiSelect
-    'Dernière modification': 'mise à jour', # formula
-    'Award': 'qualite',                     # multiSelect
-    'Téléchargement.': 'url',               # button
-#    'Mise à jour': 'lienmiseajour',         # button
-#    'Erreur': 'lienerreur'                  # button
-}
+#-------------------------------------------------------------------------------
+def fatal(source, message):
+    error(source, message)
+    exit()
 
-def get_data(row, columns):
+def error(source, message):
+    if source: source+=" :"
+    print(source, message, file=sys.stderr)
+
+def trace(name, value):
+    return "{name}:{value}".format(name=name, value=value)
+
+def debug(message):
+    print("DEBUG", message, file=sys.stderr)
+
+#def debug(x): pass
+#-------------------------------------------------------------------------------
+
+def get_dict(columns):
+    dict = {} 
+    for column in columns:
+        col = {}
+        col.update({"description":column['description']})
+        col.update({"type":column['type']})
+        dict.update({column['name']:col})
+    return dict
+
+def get_data(row, columns, dict):
     acc = {}
     for column in columns:
-        if column['name'] in identifiers.keys():
-            id = column['name']
+        if column['name'] in dict.keys():
+            id = dict[column['name']].get('alias') or column['name']
             if row['cellValuesByColumnId'].get(column['id']):
                 val = row['cellValuesByColumnId'][column['id']]
                 if column['type'] == 'select':
@@ -66,32 +68,87 @@ def flatData(data):
     names = dict.fromkeys(k for d in lines for k in d)
     return [[*names]] + [ [*map(line.get,names)] for line in lines ]
 
+class ParseRename(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not getattr(namespace, self.dest):
+            setattr(namespace, self.dest, dict())
+        for v in values:
+            rename = v.split('=')
+            if len(rename) != 2:
+                raise argparse.ArgumentError(self, "%s bad rename argument syntax, '=' missing" % v)
+            getattr(namespace, self.dest).update({rename[0]:rename[1]})
+
 def main():
-    parser = argparse.ArgumentParser(
-                    description='convert airtable content',
-                    epilog='Text at the bottom of help')
-    parser.add_argument('columns', metavar='C', nargs='*', help='columns to convert')
-    parser.add_argument('-f', '--format', default='json', help='define output format, default is json')
+    
+    parser = argparse.ArgumentParser(description='convert airtable content',
+                                     epilog='any include, exclude or rename parameter which did not match an airtable dictionary entry is silently ignored')
+    parser.add_argument('-f', '--file', type=argparse.FileType(), help='airtable file to be processed')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-x', '--exclude', nargs='+', action='extend', help='exclude column from extraction')
+    group.add_argument('-i', '--include', nargs='+', action='extend', help='include column in extraction')
+    parser.add_argument('-r', '--rename', nargs='+', action=ParseRename, help='rename column during extraction')
+    parser.add_argument('-o', '--outformat', default='csv', choices=["json", "csv"], help='define output format (default: csv)',)
 
+    debug("... parsing args")
     args=parser.parse_args()
-    print(args) 
-   # args = sys.argv[1:]
 
-    if len(args) == 1 :
-        jsonfile=args[0]
-        print("opening", jsonfile, file=sys.stderr)
-        with open(jsonfile, "r") as f:
-            airtable = json.load(f)
-        columns = airtable["columns"]
-        data = [get_data(row, columns) for row in airtable["rows"]]
-#        json.dump(data, sys.stdout, indent=4)
+    debug("... checking file")
+    if not args.file:
+        if os.isatty(sys.stdin.fileno()):
+            fatal(os.path.basename(sys.argv[0]), "need a file to process")
+        else:
+            args.file = sys.stdin
+
+    debug(trace("parser.prog", parser.prog))
+    debug(trace("outformat", args.outformat))
+    debug(trace("file", args.file))
+    debug(trace("include", args.include))
+    debug(trace("exclude", args.exclude))
+    debug(trace("rename", args.rename))
+
+    debug("... loading")
+    airtable = json.load(args.file)
+    columns = airtable["table"]["columns"]
+    rows = airtable["table"]["rows"]
+
+    debug("... extracting dict")
+    dict = get_dict(columns)
+
+    if not args.include and not args.exclude and not args.rename: 
+        debug("... exporting dict")
+        if args.outformat == "csv":
+            w = csv.DictWriter(sys.stdout, fieldnames='name description type'.split())
+            for k,v in dict.items():
+                D = v.copy() # So dict is not modified.
+                D['name'] = k
+                w.writerow(D)
+        else:
+            print(dict)
+        exit()
+
+    [dict[name].update({"keep":True}) for name in args.include or [] if name in dict.keys()]
+
+    if args.exclude:
+        [dict[name].update({"keep":True}) for name in dict.keys() if name not in args.exclude] 
+ 
+    for name in list(dict.keys()):
+        if args.rename and name in args.rename.keys():
+            dict[name].update({'keep':True})
+            dict[name].update({'alias':args.rename[name]})
+        elif not dict[name].get('keep'):
+            del dict[name]
+
+    debug("... extracting data")
+    data = [get_data(row, columns, dict) for row in rows]
+
+    if args.outformat == "csv":
+        debug("... writing csv output")
         writer = csv.writer(sys.stdout)
         for line in flatData(data):
             writer.writerow(line)
-#            print(line)
-
-    else :
-        print("usage", sys.argv[0], "<airtable json finename>")
+    else:
+        debug("... writing json output")
+        print(data)
 
 # Python boilerplate.
 if __name__ == '__main__':
